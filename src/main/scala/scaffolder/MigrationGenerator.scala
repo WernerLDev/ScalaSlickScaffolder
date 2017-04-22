@@ -9,6 +9,8 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                     |# --- !Ups
                     |{upsql}
                     |
+                    |{fkeys}
+                    |
                     |# --- !Downs
                     |{downsql}
                      """.stripMargin
@@ -16,16 +18,38 @@ case class MigrationGenerator(all:List[SpecEntity]) {
     val upTpl:String = """
                         |CREATE TABLE `{tblname}` ( 
                         |
-                        |{tblfields}, 
-                        |
+                        |{tblfields},
                         |  PRIMARY KEY (`id`),
                         |  UNIQUE INDEX `id_UNIQUE` (`id` ASC)
                         |);""".stripMargin
 
 
     def generate = {
+        val fkeys = all.map(entity => {
+            generateForeignKeys(entity)
+        })
         tpl.replaceAll("\\{downsql\\}", generateDowns.mkString("\n"))
            .replaceAll("\\{upsql\\}", generateUps.mkString("\n"))
+           .replaceAll("\\{fkeys\\}", fkeys.mkString("\n"))
+    }
+
+    def getSqlType(atype:String) = {
+        if(atype == "string") "VARCHAR(255)"
+        else if(atype == "long") "INT(11)"
+        else if(atype == "text") "TEXT"
+        else ""
+    }
+
+    def generateForeignKeys(entity:SpecEntity) = {
+        val keys = entity.relations.map(relation => {
+            val re = all.filter(x => x.name == relation.of)
+            if(re.length > 0) {
+                "ALTER TABLE `"+entity.plural+"` ADD FOREIGN KEY ("+re.head.name+"_id) REFERENCES "+re.head.plural+"(id)"
+            } else {
+                ""
+            }
+        }).mkString(";\n")
+        if(keys.length > 0) keys + ";" else ""
     }
 
     def generateUps = {
@@ -35,9 +59,11 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                 if(field.atype == "key") {
                     "  `" + field.name + "` BIGINT NOT NULL AUTO_INCREMENT" 
                 } else {
-                    "  `" + field.name + "` " + field.atype + " NULL"
+                    "  `" + field.name + "` " + getSqlType(field.atype.toLowerCase) + " NOT NULL"
                 }
             }).mkString(",\n")
+            //val keys = generateForeignKeys(entity)
+            //val out = (fields ++ keys).mkString(",\n")
             createsql.replaceAll("\\{tblfields\\}", fields)
         })
     }
