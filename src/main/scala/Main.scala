@@ -37,7 +37,11 @@ object Main extends App {
     }
 
     override def main(args:Array[String]) {
-      val reader = ReadSpec("specs/test.json")
+      val specfile = {
+          if(args.length > 0) args(0)
+          else "SlickScaffolder/specs/test.json"
+      } 
+      val reader = ReadSpec(specfile)
       reader.getData match {
           case x:JsSuccess[SpecFile] => {
             val imports = ImportGenerator(x.get).generate
@@ -47,7 +51,7 @@ object Main extends App {
             println("*****************************************************" + scala.Console.RESET)
             entities.foreach(entity => {
                 val generator = Generator(entity, entities)
-                val pw = new PrintWriter(new File("output/" + entity.name + ".scala" ))
+                val pw = new PrintWriter(new File(x.get.modelFolder + "/" + entity.name + ".scala" ))
                 pw.write(imports)
                 pw.write(generator.generate)
                 pw.close()

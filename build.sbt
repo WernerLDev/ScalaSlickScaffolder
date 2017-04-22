@@ -1,13 +1,13 @@
 import Dependencies._
 
-lazy val root = (project in file(".")).
+lazy val SlickScaffolder = (project in file(".")).
   settings(
     inThisBuild(List(
-      organization := "com.example",
+      organization := "werlang",
       scalaVersion := "2.12.1",
       version      := "0.1.0-SNAPSHOT"
     )),
-    name := "Hello",
+    name := "SlickScaffolder",
     libraryDependencies += scalaTest % Test,
-    libraryDependencies += "com.typesafe.play" % "play-json_2.12" % "2.6.0-M6"
+    libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0-M6"
   )
