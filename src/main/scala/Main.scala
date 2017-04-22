@@ -5,14 +5,19 @@ import java.io._
 object Main extends App {
 
     def handleErrors(e:JsError) {
-        println("Error parsing Json: ")
+        println(scala.Console.RED + "*******************************")
+        println("* "+scala.Console.RESET+"Error parsing Json :( " + scala.Console.RED + "      *")
+        println(scala.Console.RED + "*******************************" + scala.Console.RESET)
         println(" ")
         e.errors.foreach {
             case (path, validationErrors) => {
+                println(scala.Console.RED + "###############################" + scala.Console.RESET)
                 println("> Path: '" + path + "': ")
                 validationErrors.foreach(error => {
                     println("> Error: " + error.message)
                 })
+                println(scala.Console.RED + "###############################" + scala.Console.RESET)
+
                 println(" ")
             }
         }
@@ -37,8 +42,8 @@ object Main extends App {
           case x:JsSuccess[SpecFile] => {
             val imports = ImportGenerator(x.get).generate
             val entities = x.get.entities.map(entity => forceLowerCase(addIds(entity)))
-            println(scala.Console.BLUE + "*****************************************************")
-            println("*"+scala.Console.RESET+" Loaded JSON file without errors. Starting magic ! "+scala.Console.BLUE+"*")
+            println(scala.Console.CYAN + "*****************************************************")
+            println("*"+scala.Console.RESET+" Loaded JSON file without errors. Starting magic ! "+scala.Console.CYAN+"*")
             println("*****************************************************" + scala.Console.RESET)
             entities.foreach(entity => {
                 val generator = Generator(entity, entities)

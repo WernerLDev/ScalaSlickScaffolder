@@ -22,12 +22,12 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
                           |    {plural}.filter(_.id === id).delete
                           |  }
                           |
-                          |  def getById(id:Long):Future[Option[{nameWC}]] = dbConfig.db.run {
-                          |    {plural}.filter(_.id === id).headOption
+                          |  def getById(id:Long) = dbConfig.db.run {
+                          |    {getById}
                           |  }
                           |
-                          |  def getAll:Future[Seq[{nameWC}]] = dbConfig.db.run {
-                          |    {plural}.result
+                          |  def getAll = dbConfig.db.run {
+                          |    {getall}
                           |  }
                           |
                           |}
@@ -41,7 +41,46 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
         val withName = pluralLower.replaceAll("\\{name\\}", spec.name)
         val nameLower = withName.replaceAll("\\{nameWC\\}", spec.name.capitalize)
         val relations = nameLower.replaceAll("\\{relations\\}", getRelations.mkString("\n"))
-        relations
+        val byid = relations.replaceAll("\\{getById\\}", generateGetById)
+        val getall = byid.replaceAll("\\{getall\\}", generateGetAll)
+        getall
+    }
+    
+    def generateSelect(afterRelation:String, after:String) = {
+        if(spec.relations.length > 0) {
+            val relations = spec.relations.map(x => {
+                val entity = all.filter(e => e.name == x.of)
+                if(entity.length > 0) {
+                    ".join(" + entity.head.plural + ").on(_."+entity.head.name+"_id === _.id)"
+                } else {
+                    println("Warning: Unknown relation used: " + x.of)
+                    ""
+                }
+            })
+            spec.plural + relations.mkString + afterRelation
+        } else {
+            spec.plural + after
+        }
+    }
+
+    def generateGetById = generateSelect(".filter(_._1.id === id).headOption", ".filter(_.id === id).headOption")
+    def generateGetAll = generateSelect(".result", ".result")
+
+    def generateGetByIdOld = {
+        if(spec.relations.length > 0) {
+            val relations = spec.relations.map(x => {
+                val entity = all.filter(e => e.name == x.of)
+                if(entity.length > 0) {
+                    ".join(" + entity.head.plural + ").on(_."+entity.head.name+"_id === _.id)"
+                } else {
+                    println("Warning: Unknown relation used: " + x.of)
+                    ""
+                }
+            })
+            spec.plural + relations.mkString + ".filter(_._1.id === id).headOption"
+        } else {
+            spec.plural + ".filter(_.id === id).headOption"
+        }
     }
 
     def getRelations = {
