@@ -1,0 +1,20 @@
+{
+    "packageName" : "models",
+    "entities" : [
+        {
+            "name" : "post",
+            "plural" : "posts",
+            "attributes" : [
+                { "name" : "title", "atype" : "String"},
+                { "name" : "content", "atype" : "text" },
+                { "name" : "category_id", "atype" : "Long" }
+            ]
+        }, {
+            "name" : "Category",
+            "plural" : "Categories",
+            "attributes" : [
+                { "name" : "name", "atype" : "string"}
+            ]
+        }
+    ]
+}
