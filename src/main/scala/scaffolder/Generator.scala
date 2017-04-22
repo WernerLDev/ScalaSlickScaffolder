@@ -2,10 +2,10 @@ package scaffolder
 
 import scaffolder._
 
-case class Generator(spec:SpecEntity) {
+case class Generator(spec:SpecEntity, all:List[SpecEntity]) {
 
     val modelGenerator:ModelGenerator = ModelGenerator(spec)
-    val daoGenerator:DaoGenerator = DaoGenerator(spec)
+    val daoGenerator:DaoGenerator = DaoGenerator(spec, all)
 
     def generate = {
         val m = modelGenerator.generate

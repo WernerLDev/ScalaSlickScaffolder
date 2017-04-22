@@ -20,7 +20,11 @@ object Main extends App {
 
     def addIds(obj:SpecEntity) = {
         val idAttr = EntityAttribute("id", "key")
-        obj.copy(attributes = idAttr :: obj.attributes)
+        val newAttributes = idAttr :: obj.attributes
+        val relations = obj.relations.filter(x => x.has == "one").map(relation => {
+            EntityAttribute(relation.of.toLowerCase + "_id", "Long")
+        })
+        obj.copy(attributes = newAttributes ++ relations)
     }
 
     def forceLowerCase(obj:SpecEntity) = {
@@ -32,17 +36,21 @@ object Main extends App {
       reader.getData match {
           case x:JsSuccess[SpecFile] => {
             val imports = ImportGenerator(x.get).generate
-            println("Loaded JSOn file without errors. Starting magic !")
-            x.get.entities.foreach(entity => {
-                val e = forceLowerCase(addIds(entity))
-                val generator = Generator(e)
-                val pw = new PrintWriter(new File("output/" + e.name + ".scala" ))
+            val entities = x.get.entities.map(entity => forceLowerCase(addIds(entity)))
+            println(scala.Console.BLUE + "*****************************************************")
+            println("*"+scala.Console.RESET+" Loaded JSON file without errors. Starting magic ! "+scala.Console.BLUE+"*")
+            println("*****************************************************" + scala.Console.RESET)
+            entities.foreach(entity => {
+                val generator = Generator(entity, entities)
+                val pw = new PrintWriter(new File("output/" + entity.name + ".scala" ))
                 pw.write(imports)
                 pw.write(generator.generate)
                 pw.close()
-                println("Generated " + e.name)
+                println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Generated " + entity.name)
             })
-            println("All done.")
+            println(scala.Console.GREEN +    "*****************************************************")
+            println("*"+scala.Console.RESET+"                    All Done !                     "+scala.Console.GREEN+"*")
+            println("*****************************************************" + scala.Console.RESET)
           }
           case e: JsError => handleErrors(e)
       }

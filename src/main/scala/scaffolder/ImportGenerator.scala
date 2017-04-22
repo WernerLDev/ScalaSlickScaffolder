@@ -17,6 +17,7 @@ case class ImportGenerator(spec:SpecFile) {
                  |import play.api.Play.current
                  |import java.sql.Timestamp
                  |import slick.profile.SqlProfile.ColumnOption.SqlType
+                 |import {packagename}._
                  |
                  |
                  |""".stripMargin
