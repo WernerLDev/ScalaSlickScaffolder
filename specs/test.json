@@ -1,6 +1,7 @@
 {
     "packageName" : "models",
     "modelFolder" : "SlickScaffolder/output",
+    "migrationFile" : "SlickScaffolder/output/migration.sql",
     "entities" : [
         {
             "name" : "post",
