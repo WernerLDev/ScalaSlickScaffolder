@@ -24,9 +24,8 @@ case class MigrationGenerator(all:List[SpecEntity]) {
 
 
     def generate = {
-        val migration = tpl.replaceAll("\\{downsql\\}", generateDowns.mkString("\n"))
-        val withUps = migration.replaceAll("\\{upsql\\}", generateUps.mkString("\n"))
-        withUps
+        tpl.replaceAll("\\{downsql\\}", generateDowns.mkString("\n"))
+           .replaceAll("\\{upsql\\}", generateUps.mkString("\n"))
     }
 
     def generateUps = {

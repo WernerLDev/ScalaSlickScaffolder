@@ -14,12 +14,11 @@ case class ModelGenerator(spec:SpecEntity) {
                           |""".stripMargin
 
     def generate = {
-        val modelName = modelStr.replaceAll("\\{name\\}", spec.name.capitalize)
-        val modelPlural = modelName.replaceAll("\\{plural\\}", spec.plural.capitalize)
-        val modelAttr = modelPlural.replaceAll("\\{modelAttributes\\}", getModelAttributes(spec.attributes))
-        val attr = modelAttr.replaceAll("\\{attributes\\}", getAttributes(spec.attributes))
-        val defAttr = attr.replaceAll("\\{defAttributes\\}", getDefAttributes(spec.attributes))
-        defAttr
+        modelStr.replaceAll("\\{name\\}", spec.name.capitalize)
+                .replaceAll("\\{plural\\}", spec.plural.capitalize)
+                .replaceAll("\\{modelAttributes\\}", getModelAttributes(spec.attributes))
+                .replaceAll("\\{attributes\\}", getAttributes(spec.attributes))
+                .replaceAll("\\{defAttributes\\}", getDefAttributes(spec.attributes))
     }
 
     def getScalaType(t:String) = {

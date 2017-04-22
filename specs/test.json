@@ -19,7 +19,7 @@
             "attributes" : [
                 { "name" : "name", "atype" : "string"}
             ],
-            "relations" : []
+            "relations": []
         }
     ]
 }

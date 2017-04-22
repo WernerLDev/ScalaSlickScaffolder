@@ -36,14 +36,13 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
     
     
     def generate = {
-        val withPlural = daoStr.replaceAll("\\{plural\\}", spec.plural)
-        val pluralLower = withPlural.replaceAll("\\{pluralWC\\}", spec.plural.capitalize)
-        val withName = pluralLower.replaceAll("\\{name\\}", spec.name)
-        val nameLower = withName.replaceAll("\\{nameWC\\}", spec.name.capitalize)
-        val relations = nameLower.replaceAll("\\{relations\\}", getRelations.mkString("\n"))
-        val byid = relations.replaceAll("\\{getById\\}", generateGetById)
-        val getall = byid.replaceAll("\\{getall\\}", generateGetAll)
-        getall
+        daoStr.replaceAll("\\{plural\\}", spec.plural)
+              .replaceAll("\\{pluralWC\\}", spec.plural.capitalize)
+              .replaceAll("\\{name\\}", spec.name)
+              .replaceAll("\\{nameWC\\}", spec.name.capitalize)
+              .replaceAll("\\{relations\\}", getRelations.mkString("\n"))
+              .replaceAll("\\{getById\\}", generateGetById)
+              .replaceAll("\\{getall\\}", generateGetAll)
     }
     
     def generateSelect(afterRelation:String, after:String) = {
