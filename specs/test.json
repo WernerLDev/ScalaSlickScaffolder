@@ -1,5 +1,6 @@
 {
     "packageName" : "models",
+    "modelFolder" : "SlickScaffolder/output",
     "entities" : [
         {
             "name" : "post",

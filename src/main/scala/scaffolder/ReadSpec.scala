@@ -8,7 +8,7 @@ import play.api.libs.json.Reads._
 case class EntityAttribute(name:String, atype:String)
 case class EntityRelation(has:String, of:String)
 case class SpecEntity(name:String, plural:String, attributes:List[EntityAttribute], relations:List[EntityRelation])
-case class SpecFile(packageName:String, modelFolder:String, entities:List[SpecEntity])
+case class SpecFile(packageName:String, modelFolder:String, migrationFile:String, entities:List[SpecEntity])
 
 case class ReadSpec(file:String) {
 

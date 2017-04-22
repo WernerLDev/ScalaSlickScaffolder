@@ -46,8 +46,8 @@ object Main extends App {
           case x:JsSuccess[SpecFile] => {
             val imports = ImportGenerator(x.get).generate
             val entities = x.get.entities.map(entity => forceLowerCase(addIds(entity)))
-            println(scala.Console.CYAN + "*****************************************************")
-            println("*"+scala.Console.RESET+" Loaded JSON file without errors. Starting magic ! "+scala.Console.CYAN+"*")
+            println(scala.Console.CYAN +    "*****************************************************")
+            println("*"+scala.Console.RESET+"          Loaded JSON file. Starting magic!        "+scala.Console.CYAN+"*")
             println("*****************************************************" + scala.Console.RESET)
             entities.foreach(entity => {
                 val generator = Generator(entity, entities)
@@ -57,6 +57,12 @@ object Main extends App {
                 pw.close()
                 println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Generated " + entity.name)
             })
+            val migrations = MigrationGenerator(entities)
+            val pw = new PrintWriter(new File(x.get.migrationFile))
+            pw.write(migrations.generate)
+            pw.close();
+            println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Migration file " + x.get.migrationFile + " generated")
+
             println(scala.Console.GREEN +    "*****************************************************")
             println("*"+scala.Console.RESET+"                    All Done !                     "+scala.Console.GREEN+"*")
             println("*****************************************************" + scala.Console.RESET)
