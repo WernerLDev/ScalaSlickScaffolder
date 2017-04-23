@@ -1,6 +1,6 @@
-package scaffolder
+package werlang.scaffolder
 
-import scaffolder._
+import werlang.scaffolder._
 
 case class ImportGenerator(spec:SpecFile) {
 

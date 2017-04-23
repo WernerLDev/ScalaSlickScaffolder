@@ -1,4 +1,4 @@
-package scaffolder
+package werlang.scaffolder
 
 import scala.io.Source
 import play.api.libs.json._

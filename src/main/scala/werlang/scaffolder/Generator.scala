@@ -1,6 +1,6 @@
-package scaffolder
+package werlang.scaffolder
 
-import scaffolder._
+import werlang.scaffolder._
 
 case class Generator(spec:SpecEntity, all:List[SpecEntity]) {
 
@@ -12,6 +12,10 @@ case class Generator(spec:SpecEntity, all:List[SpecEntity]) {
         val dao = daoGenerator.generate
 
         m + dao
+    }
+
+    def generateClass = {
+        daoGenerator.generateClass
     }
 
 }

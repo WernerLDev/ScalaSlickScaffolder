@@ -1,5 +1,5 @@
-package scaffolder
-import scaffolder._
+package werlang.scaffolder
+import werlang.scaffolder._
 
 case class ModelGenerator(spec:SpecEntity) {
 

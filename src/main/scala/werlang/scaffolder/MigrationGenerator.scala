@@ -1,5 +1,5 @@
-package scaffolder
-import scaffolder._
+package werlang.scaffolder
+import werlang.scaffolder._
 
 case class MigrationGenerator(all:List[SpecEntity]) {
 
@@ -17,7 +17,6 @@ case class MigrationGenerator(all:List[SpecEntity]) {
 
     val upTpl:String = """
                         |CREATE TABLE `{tblname}` ( 
-                        |
                         |{tblfields},
                         |  PRIMARY KEY (`id`),
                         |  UNIQUE INDEX `id_UNIQUE` (`id` ASC)

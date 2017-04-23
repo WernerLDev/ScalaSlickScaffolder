@@ -1,12 +1,11 @@
-package scaffolder
-import scaffolder._
+package werlang.scaffolder
+import werlang.scaffolder._
 
 case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
 
     val daoStr:String = """
                           |
-                          |@Singleton
-                          |class {pluralWC} @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
+                          |trait T{pluralWC} extends HasDatabaseConfigProvider[JdbcProfile] {
                           |
                           |  val {plural} = TableQuery[{nameWC}TableDef]
                           |  {relations} 
@@ -44,6 +43,15 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
               .replaceAll("\\{getById\\}", generateGetById)
               .replaceAll("\\{getall\\}", generateGetAll)
     }
+
+    def generateClass= {
+        val classtpl = """|@Singleton
+                          |class {pluralWC} @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends T{pluralWC} {
+                          |
+                          |}""".stripMargin
+        
+        classtpl.replaceAll("\\{pluralWC\\}", spec.plural.capitalize)
+    }
     
     def generateSelect(afterRelation:String, after:String) = {
         if(spec.relations.length > 0) {
@@ -62,25 +70,8 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
         }
     }
 
-    def generateGetById = generateSelect(".filter(_._1.id === id).headOption", ".filter(_.id === id).headOption")
+    def generateGetById = generateSelect(".filter(_._1.id === id).result.headOption", ".filter(_.id === id).result.headOption")
     def generateGetAll = generateSelect(".result", ".result")
-
-    def generateGetByIdOld = {
-        if(spec.relations.length > 0) {
-            val relations = spec.relations.map(x => {
-                val entity = all.filter(e => e.name == x.of)
-                if(entity.length > 0) {
-                    ".join(" + entity.head.plural + ").on(_."+entity.head.name+"_id === _.id)"
-                } else {
-                    println("Warning: Unknown relation used: " + x.of)
-                    ""
-                }
-            })
-            spec.plural + relations.mkString + ".filter(_._1.id === id).headOption"
-        } else {
-            spec.plural + ".filter(_.id === id).result.headOption"
-        }
-    }
 
     def getRelations = {
         spec.relations.map(relation => {

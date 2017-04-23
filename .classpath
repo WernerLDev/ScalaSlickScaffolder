@@ -1,0 +1,72 @@
+<classpath>
+  <classpathentry kind="src" path="src/main/scala"/>
+  <classpathentry kind="src" path="src/test/scala"/>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/com.typesafe.play/play-json_2.11/srcs/play-json_2.11-2.6.0-M6-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/com.typesafe.play/play-json_2.11/jars/play-json_2.11-2.6.0-M6.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/com.typesafe.play/play-json_2.11/docs/play-json_2.11-2.6.0-M6-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/com.typesafe.play/play-functional_2.11/srcs/play-functional_2.11-2.6.0-M6-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/com.typesafe.play/play-functional_2.11/jars/play-functional_2.11-2.6.0-M6.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/com.typesafe.play/play-functional_2.11/docs/play-functional_2.11-2.6.0-M6-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/org.typelevel/macro-compat_2.11/srcs/macro-compat_2.11-1.1.1-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/org.typelevel/macro-compat_2.11/jars/macro-compat_2.11-1.1.1.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/org.typelevel/macro-compat_2.11/docs/macro-compat_2.11-1.1.1-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/joda-time/joda-time/srcs/joda-time-2.9.6-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.9.6.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/joda-time/joda-time/docs/joda-time-2.9.6-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/srcs/jackson-core-2.8.5-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/bundles/jackson-core-2.8.5.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/docs/jackson-core-2.8.5-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/srcs/jackson-annotations-2.8.5-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/bundles/jackson-annotations-2.8.5.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/docs/jackson-annotations-2.8.5-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/srcs/jackson-databind-2.8.5-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/bundles/jackson-databind-2.8.5.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/docs/jackson-databind-2.8.5-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/srcs/jackson-datatype-jdk8-2.8.5-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/bundles/jackson-datatype-jdk8-2.8.5.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/docs/jackson-datatype-jdk8-2.8.5-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/srcs/jackson-datatype-jsr310-2.8.5-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/bundles/jackson-datatype-jsr310-2.8.5.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/docs/jackson-datatype-jsr310-2.8.5-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/org.scalatest/scalatest_2.11/srcs/scalatest_2.11-3.0.1-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/org.scalatest/scalatest_2.11/bundles/scalatest_2.11-3.0.1.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/org.scalatest/scalatest_2.11/docs/scalatest_2.11-3.0.1-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/org.scalactic/scalactic_2.11/srcs/scalactic_2.11-3.0.1-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/org.scalactic/scalactic_2.11/bundles/scalactic_2.11-3.0.1.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/org.scalactic/scalactic_2.11/docs/scalactic_2.11-3.0.1-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/srcs/scala-xml_2.11-1.0.5-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.5.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/docs/scala-xml_2.11-1.0.5-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry sourcepath="/home/werner/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/srcs/scala-parser-combinators_2.11-1.0.4-sources.jar" kind="lib" path="/home/werner/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.4.jar">
+    <attributes>
+      <attribute name="javadoc_location" value="jar:file:/home/werner/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/docs/scala-parser-combinators_2.11-1.0.4-javadoc.jar!/"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="output" path="bin"/>
+</classpath>

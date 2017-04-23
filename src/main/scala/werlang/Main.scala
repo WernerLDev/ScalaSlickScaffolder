@@ -1,4 +1,6 @@
-import scaffolder._
+package werlang
+
+import werlang.scaffolder._
 import play.api.libs.json._
 import java.io._
 
@@ -25,7 +27,8 @@ object Main extends App {
 
     def addIds(obj:SpecEntity) = {
         val idAttr = EntityAttribute("id", "key")
-        val newAttributes = idAttr :: obj.attributes
+        val nameAttr = EntityAttribute("name", "string")
+        val newAttributes = idAttr :: nameAttr :: obj.attributes
         val relations = obj.relations.filter(x => x.has == "one").map(relation => {
             EntityAttribute(relation.of.toLowerCase + "_id", "Long")
         })
@@ -41,6 +44,14 @@ object Main extends App {
           if(args.length > 0) args(0)
           else "SlickScaffolder/specs/test.json"
       } 
+      val jsonfile = new File(specfile)
+      if(jsonfile.exists == false) {
+            println(scala.Console.RED + "**************************************")
+            println("* Error: " + scala.Console.RESET+"Could not find JSON file :( " + scala.Console.RED + "*")
+            println(scala.Console.RED + "**************************************" + scala.Console.RESET)
+          
+          return;
+      }
       val reader = ReadSpec(specfile)
       reader.getData match {
           case x:JsSuccess[SpecFile] => {
@@ -49,18 +60,30 @@ object Main extends App {
             println(scala.Console.CYAN +    "*****************************************************")
             println("*"+scala.Console.RESET+"          Loaded JSON file. Starting magic!        "+scala.Console.CYAN+"*")
             println("*****************************************************" + scala.Console.RESET)
+            val pw = new PrintWriter(new File(x.get.modelFolder + "/Tables.scala"))
+            pw.write(imports)
             entities.foreach(entity => {
                 val generator = Generator(entity, entities)
-                val pw = new PrintWriter(new File(x.get.modelFolder + "/" + entity.name + ".scala" ))
-                pw.write(imports)
+                //val pw = new PrintWriter(new File(x.get.modelFolder + "/" + entity.name + ".scala" ))
+                //pw.write(imports)
                 pw.write(generator.generate)
-                pw.close()
-                println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Generated " + x.get.modelFolder + "/" +  entity.name + ".scala")
+                val modelFile = new File(x.get.modelFolder + "/" + entity.name + ".scala")
+                if(modelFile.exists) {
+                    println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Skipping  " + x.get.modelFolder + "/" +  entity.name + ".scala, Already exists.")
+                } else {
+                    val classpw = new PrintWriter(modelFile)
+                    classpw.write(imports)
+                    classpw.write(generator.generateClass)
+                    classpw.close()
+                    println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Generated " + x.get.modelFolder + "/" +  entity.name + ".scala")
+                }
             })
+            pw.close()
+            println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Generated " + x.get.modelFolder + "/Tables.scala")
             val migrations = MigrationGenerator(entities)
-            val pw = new PrintWriter(new File(x.get.migrationFile))
-            pw.write(migrations.generate)
-            pw.close();
+            val pw2 = new PrintWriter(new File(x.get.migrationFile))
+            pw2.write(migrations.generate)
+            pw2.close();
             println(scala.Console.GREEN + "[OK] "+scala.Console.RESET + "Generated " +  x.get.migrationFile)
 
             println(scala.Console.GREEN +    "*****************************************************")
