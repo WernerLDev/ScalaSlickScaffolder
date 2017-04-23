@@ -9,11 +9,11 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                     |# --- !Ups
                     |{upsql}
                     |
-                    |{fkeys}
+                    |{indexes}
                     |
                     |# --- !Downs
                     |{downsql}
-                     """.stripMargin
+                    |""".stripMargin
 
     val upTpl:String = """
                         |CREATE TABLE `{tblname}` ( 
@@ -26,25 +26,26 @@ case class MigrationGenerator(all:List[SpecEntity]) {
 
     def generate = {
         val fkeys = all.map(entity => {
-            generateForeignKeys(entity)
+            generateIndexes(entity)
         })
         tpl.replaceAll("\\{downsql\\}", generateDowns.mkString("\n"))
            .replaceAll("\\{upsql\\}", generateUps.mkString("\n"))
-           .replaceAll("\\{fkeys\\}", fkeys.mkString("\n"))
+           .replaceAll("\\{indexes\\}", fkeys.mkString("\n"))
     }
 
     def getSqlType(atype:String) = {
-        if(atype == "string") "VARCHAR(255)"
-        else if(atype == "long") "INT(11)"
-        else if(atype == "text") "TEXT"
+        if(atype == "string") "VARCHAR(255) NOT NULL"
+        else if(atype == "long") "INT(11) NOT NULL"
+        else if(atype == "text") "TEXT NOT NULL"
+        else if(atype == "timestamp") "DATETIME NOT NULL DEFAULT NOW()"
         else ""
     }
 
-    def generateForeignKeys(entity:SpecEntity) = {
-        val keys = entity.relations.map(relation => {
+    def generateIndexes(entity:SpecEntity) = {
+        val keys = entity.relations.filter(x => x.has == "one").map(relation => {
             val re = all.filter(x => x.name == relation.of)
             if(re.length > 0) {
-                "ALTER TABLE `"+entity.plural+"` ADD FOREIGN KEY ("+re.head.name+"_id) REFERENCES "+re.head.plural+"(id)"
+                "ALTER TABLE `"+entity.plural+"` ADD INDEX ("+re.head.name+"_id)"
             } else {
                 ""
             }
@@ -59,7 +60,7 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                 if(field.atype == "key") {
                     "  `" + field.name + "` BIGINT NOT NULL AUTO_INCREMENT" 
                 } else {
-                    "  `" + field.name + "` " + getSqlType(field.atype.toLowerCase) + " NOT NULL"
+                    "  `" + field.name + "` " + getSqlType(field.atype.toLowerCase)
                 }
             }).mkString(",\n")
             //val keys = generateForeignKeys(entity)

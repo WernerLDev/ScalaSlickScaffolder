@@ -24,6 +24,7 @@ case class ModelGenerator(spec:SpecEntity) {
     def getScalaType(t:String) = {
         if(t == "text") "String"
         else if(t == "string") "String"
+        else if(t == "timestamp") "Timestamp"
         else if(t == "key") "Long"
         else t
     }

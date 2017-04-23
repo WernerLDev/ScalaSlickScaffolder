@@ -4,7 +4,7 @@ lazy val SlickScaffolder = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "werlang",
-      scalaVersion := "2.12.1",
+      scalaVersion := "2.11.7",
       version      := "0.1.0-SNAPSHOT"
     )),
     name := "SlickScaffolder",

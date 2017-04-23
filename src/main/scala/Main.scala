@@ -55,13 +55,13 @@ object Main extends App {
                 pw.write(imports)
                 pw.write(generator.generate)
                 pw.close()
-                println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Generated " + entity.name)
+                println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Generated " + x.get.modelFolder + "/" +  entity.name + ".scala")
             })
             val migrations = MigrationGenerator(entities)
             val pw = new PrintWriter(new File(x.get.migrationFile))
             pw.write(migrations.generate)
             pw.close();
-            println(scala.Console.GREEN + "[OK] "+scala.Console.RESET+"Migration file " + x.get.migrationFile + " generated")
+            println(scala.Console.GREEN + "[OK] "+scala.Console.RESET + "Generated " +  x.get.migrationFile)
 
             println(scala.Console.GREEN +    "*****************************************************")
             println("*"+scala.Console.RESET+"                    All Done !                     "+scala.Console.GREEN+"*")

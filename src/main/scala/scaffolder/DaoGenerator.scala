@@ -12,7 +12,7 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
                           |  {relations} 
                           |  val insertQuery = {plural} returning {plural}.map(_.id) into (({name}, id) => {name}.copy(id = id))
                           |
-                          |  def insert({name}:{nameWC}) = dbConfig.db.run(insertQuery += {name}
+                          |  def insert({name}:{nameWC}) = dbConfig.db.run(insertQuery += {name})
                           |    
                           |  def update({name}:{nameWC}) = dbConfig.db.run {
                           |    {plural}.filter(_.id === {name}.id).update({name})
@@ -78,12 +78,12 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
             })
             spec.plural + relations.mkString + ".filter(_._1.id === id).headOption"
         } else {
-            spec.plural + ".filter(_.id === id).headOption"
+            spec.plural + ".filter(_.id === id).result.headOption"
         }
     }
 
     def getRelations = {
-        spec.relations.filter(x => x.has == "one").map(relation => {
+        spec.relations.map(relation => {
             val r = all.filter(entity => entity.name == relation.of)
             if(r.length > 0) {
                 val re = r.head
