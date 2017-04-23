@@ -17,9 +17,8 @@
             "name" : "Category",
             "plural" : "Categories",
             "attributes" : [
-                { "name" : "name", "atype" : "string"}
+                { "name" : "categoryname", "atype" : "string"}
             ],
             "relations": []
-        }
-    ]
+        }    ]
 }

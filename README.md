@@ -51,27 +51,27 @@ import slick.profile.SqlProfile.ColumnOption.SqlType
 import models._
 
 
-case class Post (id:Long, title:String, content:String, category_id:Long)
+case class Post (id:Long, name:String, title:String, content:String, category_id:Long)
 
 class PostTableDef(tag:Tag) extends Table[Post](tag, "Posts") {
   
   def id = column[Long]("id", O.PrimaryKey,O.AutoInc)
+  def name = column[String]("name")
   def title = column[String]("title")
   def content = column[String]("content")
   def category_id = column[Long]("category_id")
 
-  override def * = (id, title, content, category_id) <>(Post.tupled, Post.unapply)
+  override def * = (id, name, title, content, category_id) <>(Post.tupled, Post.unapply)
 }
 
 
-@Singleton
-class Posts @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
+trait TPosts extends HasDatabaseConfigProvider[JdbcProfile] {
 
   val posts = TableQuery[PostTableDef]
   val categories = TableQuery[CategoryTableDef] 
   val insertQuery = posts returning posts.map(_.id) into ((post, id) => post.copy(id = id))
 
-  def insert(post:Post) = dbConfig.db.run(insertQuery += post
+  def insert(post:Post) = dbConfig.db.run(insertQuery += post)
     
   def update(post:Post) = dbConfig.db.run {
     posts.filter(_.id === post.id).update(post)
@@ -82,7 +82,7 @@ class Posts @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) ex
   }
 
   def getById(id:Long) = dbConfig.db.run {
-    posts.join(categories).on(_.category_id === _.id).filter(_._1.id === id).headOption
+    posts.join(categories).on(_.category_id === _.id).filter(_._1.id === id).result.headOption
   }
 
   def getAll = dbConfig.db.run {
@@ -90,27 +90,25 @@ class Posts @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) ex
   }
 
 }
-
-
-case class Category (id:Long, name:String)
+case class Category (id:Long, name:String, categoryname:String)
 
 class CategoryTableDef(tag:Tag) extends Table[Category](tag, "Categories") {
   
   def id = column[Long]("id", O.PrimaryKey,O.AutoInc)
   def name = column[String]("name")
+  def categoryname = column[String]("categoryname")
 
-  override def * = (id, name) <>(Category.tupled, Category.unapply)
+  override def * = (id, name, categoryname) <>(Category.tupled, Category.unapply)
 }
 
 
-@Singleton
-class Categories @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
+trait TCategories extends HasDatabaseConfigProvider[JdbcProfile] {
 
   val categories = TableQuery[CategoryTableDef]
    
   val insertQuery = categories returning categories.map(_.id) into ((category, id) => category.copy(id = id))
 
-  def insert(category:Category) = dbConfig.db.run(insertQuery += category
+  def insert(category:Category) = dbConfig.db.run(insertQuery += category)
     
   def update(category:Category) = dbConfig.db.run {
     categories.filter(_.id === category.id).update(category)
@@ -121,7 +119,7 @@ class Categories @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
   }
 
   def getById(id:Long) = dbConfig.db.run {
-    categories.filter(_.id === id).headOption
+    categories.filter(_.id === id).result.headOption
   }
 
   def getAll = dbConfig.db.run {
