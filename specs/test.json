@@ -20,5 +20,6 @@
                 { "name" : "categoryname", "atype" : "string"}
             ],
             "relations": []
-        }    ]
+        }    
+    ]
 }

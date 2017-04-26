@@ -3,19 +3,19 @@ import werlang.scaffolder._
 
 case class ModelGenerator(spec:SpecEntity) {
 
-    val modelStr:String = """|case class {name} ({modelAttributes})
+    val modelStr:String = """|case class {nameWC} ({modelAttributes})
                           |
-                          |class {name}TableDef(tag:Tag) extends Table[{name}](tag, "{plural}") {
+                          |class {nameWC}TableDef(tag:Tag) extends Table[{nameWC}](tag, "{plural}") {
                           |  
                           |{defAttributes}
                           |
-                          |  override def * = ({attributes}) <>({name}.tupled, {name}.unapply)
+                          |  override def * = ({attributes}) <>({nameWC}.tupled, {nameWC}.unapply)
                           |}
                           |""".stripMargin
 
     def generate = {
-        modelStr.replaceAll("\\{name\\}", spec.name.capitalize)
-                .replaceAll("\\{plural\\}", spec.plural.capitalize)
+        modelStr.replaceAll("\\{nameWC\\}", spec.name.capitalize)
+                .replaceAll("\\{plural\\}", spec.plural.toLowerCase)
                 .replaceAll("\\{modelAttributes\\}", getModelAttributes(spec.attributes))
                 .replaceAll("\\{attributes\\}", getAttributes(spec.attributes))
                 .replaceAll("\\{defAttributes\\}", getDefAttributes(spec.attributes))
