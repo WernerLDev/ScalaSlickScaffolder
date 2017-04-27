@@ -20,6 +20,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                     |    implicit val tsreads: Reads[Timestamp] = Reads.of[Long] map (new Timestamp(_))
                     |    implicit val {nameWC}Writes = Json.writes[{nameWC}]
                     |    implicit val {nameWC}Reads = Json.reads[{nameWC}]
+                    |{relationReads}
                     |
                     |    def getAll(request:AuthRequest[AnyContent]) = {
                     |        {getstr}
@@ -77,7 +78,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                 if(entity.relations.length == 0) {
                     entity.plural + ".getAll.map(x => Ok(Json.toJson(x)))"
                 } else {
-                    entity.plural + ".getAll.map(x => Ok(Json.toJson(x.map(_._1))))"
+                    entity.plural + ".getAll.map(entities => Ok(Json.toJson(entities.map(x => "+ generateMap(entity) +" ))))"
                 }
             }
             tpl.replaceAll("\\{name\\}", entity.name.toLowerCase)
@@ -85,7 +86,25 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                .replaceAll("\\{plural\\}", entity.plural.toLowerCase)
                .replaceAll("\\{pluralWC\\}", entity.plural.toLowerCase.capitalize)
                .replaceAll("\\{getstr\\}", getstr)
+               .replaceAll("\\{relationReads\\}", generateReads(entity))
         }).mkString("\n") + generateMainController
+    }
+
+    def generateReads(entity:SpecEntity) = {
+        entity.relations.map(x => {
+            "    implicit val " + x.of + "Writes = Json.writes["+x.of.capitalize+"]"
+        }).mkString("\n")
+    }
+
+    def generateMap(entity:SpecEntity) = {
+        val mainObj = "\"" + entity.name + "\" -> Json.toJson(x._1)";
+        val attr = entity.attributes.map(x => {
+            "\"" + x.name + "\" -> x._1." + x.name
+        }).mkString(", ")
+        val relationObjs = entity.relations.zipWithIndex.map{ case (r,i) => {
+            "\"" + r.of + "\" -> Json.toJson(x._" + (i + 2) + ")"
+        }}
+        "Map( " + attr + ", " + relationObjs.mkString(", ") + ")"
     }
 
     def generateMainController = {

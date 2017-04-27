@@ -3,7 +3,7 @@ import werlang.scaffolder._
 
 case class ModelGenerator(spec:SpecEntity) {
 
-    val modelStr:String = """|case class {nameWC} ({modelAttributes})
+    val modelStr:String = """|case class {nameWC} ({modelAttributes}) 
                           |
                           |class {nameWC}TableDef(tag:Tag) extends Table[{nameWC}](tag, "{plural}") {
                           |  
