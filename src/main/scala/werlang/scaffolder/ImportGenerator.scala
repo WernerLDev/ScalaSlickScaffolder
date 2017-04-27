@@ -17,12 +17,22 @@ case class ImportGenerator(spec:SpecFile) {
                  |import play.api.Play.current
                  |import java.sql.Timestamp
                  |import slick.profile.SqlProfile.ColumnOption.SqlType
-                 |import {packagename}._
-                 |
+                 |{imports}
                  |
                  |""".stripMargin
 
     def generate = {
         tpl.replaceAll("\\{packagename\\}", spec.packageName)
+           .replaceAll("\\{imports\\}", "import " + spec.packageName + "._")
+    }
+
+    def generateControllerImport = {
+        val controllerImports = """|import play.api.mvc._
+                                   |import core.utils._
+                                   |import play.api.libs.json._
+                                   |import play.api.libs.json.Reads._
+                                   |""".stripMargin
+        tpl.replaceAll("\\{packagename\\}", spec.controllerPackage)
+           .replaceAll("\\{imports\\}", controllerImports + "\nimport " + spec.packageName + "._")
     }
 }

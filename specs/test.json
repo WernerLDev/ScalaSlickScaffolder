@@ -2,6 +2,8 @@
     "packageName" : "models",
     "modelFolder" : "SlickScaffolder/output",
     "migrationFile" : "SlickScaffolder/output/migration.sql",
+    "controllerPackage" : "controllers",
+    "controllerFile" : "SlickScaffolder/output/GeneratedControllers.scala",
     "entities" : [
         {
             "name" : "post",

@@ -56,6 +56,7 @@ object Main extends App {
       reader.getData match {
           case x:JsSuccess[SpecFile] => {
             val imports = ImportGenerator(x.get).generate
+            val importsController = ImportGenerator(x.get).generateControllerImport
             val entities = x.get.entities.map(entity => forceLowerCase(addIds(entity)))
             println(scala.Console.CYAN +    "*****************************************************")
             println("*"+scala.Console.RESET+"          Loaded JSON file. Starting magic!        "+scala.Console.CYAN+"*")
@@ -83,8 +84,15 @@ object Main extends App {
             val migrations = MigrationGenerator(entities)
             val pw2 = new PrintWriter(new File(x.get.migrationFile))
             pw2.write(migrations.generate)
-            pw2.close();
+            pw2.close()
             println(scala.Console.GREEN + "[OK] "+scala.Console.RESET + "Generated " +  x.get.migrationFile)
+
+            val controllers = ControllerGenerator(entities)
+            val pw3 = new PrintWriter(new File(x.get.controllerFile))
+            pw3.write(importsController)
+            pw3.write(controllers.generate)
+            pw3.close()
+            println(scala.Console.GREEN + "[OK] "+scala.Console.RESET + "Generated " +  x.get.controllerFile)
 
             println(scala.Console.GREEN +    "*****************************************************")
             println("*"+scala.Console.RESET+"                    All Done !                     "+scala.Console.GREEN+"*")
