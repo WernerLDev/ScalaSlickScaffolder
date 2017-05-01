@@ -96,10 +96,22 @@ case class ControllerGenerator(all:List[SpecEntity]) {
         }).mkString("\n")
     }
 
+    def getMapField(x:EntityAttribute) = {
+        val longs = List("long", "key")
+        var strings = List("text", "string")
+        if(longs.contains(x.atype.toLowerCase)) {
+            "\"" + x.name + "\" -> JsNumber(x._1." + x.name + ")"
+        } else if(x.atype.toLowerCase == "timestamp") {
+            "\"" + x.name + "\" -> JsNumber(x._1." + x.name + ".getTime())"
+        } else {
+            "\"" + x.name + "\"-> JsString(x._1." + x.name + ")"
+        }
+    }
+
     def generateMap(entity:SpecEntity) = {
         val mainObj = "\"" + entity.name + "\" -> Json.toJson(x._1)";
         val attr = entity.attributes.map(x => {
-            "\"" + x.name + "\" -> x._1." + x.name
+            this.getMapField(x)
         }).mkString(", ")
         val relationObjs = entity.relations.zipWithIndex.map{ case (r,i) => {
             "\"" + r.of + "\" -> Json.toJson(x._" + (i + 2) + ")"
