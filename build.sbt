@@ -10,5 +10,5 @@ lazy val SlickScaffolder = (project in file(".")).
     name := "SlickScaffolder",
     scalacOptions += "-deprecation",
     libraryDependencies += scalaTest % Test,
-    libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0-M6"
+    libraryDependencies += "com.typesafe.play" %% "play-json" % "2.5.14"
   )

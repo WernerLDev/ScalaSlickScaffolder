@@ -4,7 +4,7 @@ import werlang.scaffolder._
 import play.api.libs.json._
 import java.io._
 
-object Main extends App {
+object Main {
 
     def handleErrors(e:JsError) {
         println(scala.Console.RED + "*******************************")
@@ -39,7 +39,7 @@ object Main extends App {
         obj.copy(name = obj.name.toLowerCase, plural = obj.plural.toLowerCase)
     }
 
-    override def main(args:Array[String]) {
+    def main(args:Array[String]) {
       val specfile = {
           if(args.length > 0) args(0)
           else "SlickScaffolder/specs/test.json"
