@@ -22,6 +22,14 @@
                 { "name" : "categoryname", "atype" : "string"}
             ],
             "relations": []
+        },
+        {
+            "name" : "Tag",
+            "plural" : "Tags",
+            "attributes" : [
+                { "name" : "tagname", "atype" : "string"}
+            ],
+            "relations": []
         }    
     ]
 }

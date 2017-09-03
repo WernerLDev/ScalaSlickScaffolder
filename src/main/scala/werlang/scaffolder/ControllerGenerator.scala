@@ -7,6 +7,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |trait TGenController {
                         |    def getAll(request:AuthRequest[AnyContent]):Future[Result]
                         |    def insert(request:AuthRequest[JsValue]):Future[Result]
+                        |    def createNew(request:AuthRequest[AnyContent]):Future[Result]
                         |}
                         |""".stripMargin
 
@@ -27,12 +28,19 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                     |    }
                     |
                     |    def insert(request:AuthRequest[JsValue]) = {
-                    |        {request.body \ "entity"}.asOpt[{nameWC}].map( entity => {
+                    |        {request.body \ "entity"}.asOpt[{nameWC}].flatMap( entity => {
                     |            {plural}.insert(entity).map(x => {
                     |                Ok(Json.toJson( Map("id" -> JsNumber(x.id)) ))
                     |            })
                     |        }).getOrElse(Future(BadRequest("Parameter missing")))
                     |    }
+                    |
+                    |    def createNew(request:AuthRequest[AnyContent]) = {
+                    |        {plural}.insert({nameWC}(
+                    |           {initialValues} 
+                    |        )) map (x => Ok(Json.toJson(x)))
+                    |    }
+                    |
                     |}
                     |""".stripMargin
 
@@ -41,13 +49,18 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |@Singleton
                         |class GeneratedController @Inject() (
                         |    WithAuthAction:AuthAction,
-                        |    {controllers}
+                        |{controllers}
                         |) extends Controller {
                         |
                         |
                         |    val controllers = Map(
-                        |        {controllermap}
+                        |{controllermap}
                         |    )
+                        | 
+                        |    val entityTypes = Map(
+                        |{entityTypes}
+                        |    )
+                        |
                         |
                         |    def getAll(name:String) = WithAuthAction.async { request =>
                         |        controllers.get(name) match {
@@ -63,9 +76,16 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |        }
                         |    }
                         |
+                        |    def createNew(name:String) = WithAuthAction.async { request =>
+                        |        controllers.get(name) match {
+                        |            case Some(x) => x.createNew(request)
+                        |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
+                        |        }
+                        |    }
+                        |
                         |    def getEntities = WithAuthAction { request =>
-                        |        val entities = controllers.map { case (k,v) => {
-                        |            Json.toJson(Map("name" -> JsString(k)))
+                        |        val entities = entityTypes.map { case (k,v) => {
+                        |            Json.toJson(Map("name" -> JsString(k.capitalize), "plural" -> JsString(v)))
                         |        }}.toSeq
                         |        Ok( Json.toJson(JsArray(entities)) )
                         |    }
@@ -87,6 +107,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                .replaceAll("\\{pluralWC\\}", entity.plural.toLowerCase.capitalize)
                .replaceAll("\\{getstr\\}", getstr)
                .replaceAll("\\{relationReads\\}", generateReads(entity))
+               .replaceAll("\\{initialValues\\}", generateInitialValues(entity.attributes))
         }).mkString("\n") + generateMainController
     }
 
@@ -94,6 +115,16 @@ case class ControllerGenerator(all:List[SpecEntity]) {
         entity.relations.map(x => {
             "    implicit val " + x.of + "Writes = Json.writes["+x.of.capitalize+"]"
         }).mkString("\n")
+    }
+
+    def generateInitialValues(attributes:List[EntityAttribute]) = {
+        attributes.map(a => {
+            val longs = List("long", "key")
+            var strings = List("text", "string")
+            if(longs.contains(a.atype.toLowerCase)) "0"
+            else if(a.atype.toLowerCase == "timestamp") "new Timestamp(new java.util.Date().getTime())"
+            else "\"\""
+        }).mkString(", ")
     }
 
     def getMapField(x:EntityAttribute) = {
@@ -121,12 +152,16 @@ case class ControllerGenerator(all:List[SpecEntity]) {
 
     def generateMainController = {
         val injects = all.map(entity => {
-            entity.plural.toLowerCase + ":Generated" + entity.plural.capitalize + "Controller"
+            "    " + entity.plural.toLowerCase + ":Generated" + entity.plural.capitalize + "Controller"
         }).mkString(",\n")
         val maps = all.map(entity => {
-            "\"" + entity.plural + "\" -> " + entity.plural
+            "        \"" + entity.plural + "\" -> " + entity.plural
+        }).mkString(",\n")
+        val entityTypes = all.map(entity => {
+            "        \"" + entity.name + "\" -> \"" + entity.plural + "\""
         }).mkString(",\n")
         tplController.replaceAll("\\{controllers\\}", injects)
-                     . replaceAll("\\{controllermap\\}", maps)
+                     .replaceAll("\\{controllermap\\}", maps)
+                     .replaceAll("\\{entityTypes\\}", entityTypes)
     }
 }

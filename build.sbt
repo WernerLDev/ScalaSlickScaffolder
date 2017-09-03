@@ -1,4 +1,4 @@
-import Dependencies._
+//import Dependencies._
 
 lazy val SlickScaffolder = (project in file(".")).
   settings(
@@ -9,6 +9,5 @@ lazy val SlickScaffolder = (project in file(".")).
     )),
     name := "SlickScaffolder",
     scalacOptions += "-deprecation",
-    libraryDependencies += scalaTest % Test,
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.5.14"
   )

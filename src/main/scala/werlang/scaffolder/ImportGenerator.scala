@@ -28,7 +28,7 @@ case class ImportGenerator(spec:SpecFile) {
 
     def generateControllerImport = {
         val controllerImports = """|import play.api.mvc._
-                                   |import core.utils._
+                                   |import utils.admin._
                                    |import play.api.libs.json._
                                    |import play.api.libs.json.Reads._
                                    |""".stripMargin
