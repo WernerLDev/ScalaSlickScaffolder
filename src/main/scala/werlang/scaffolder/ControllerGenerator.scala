@@ -7,6 +7,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |trait TGenController {
                         |    def getAll(request:AuthRequest[AnyContent]):Future[Result]
                         |    def insert(request:AuthRequest[JsValue]):Future[Result]
+                        |    def delete(id:Long, request:AuthRequest[AnyContent]):Future[Result]
                         |    def createNew(request:AuthRequest[AnyContent]):Future[Result]
                         |}
                         |""".stripMargin
@@ -28,11 +29,15 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                     |    }
                     |
                     |    def insert(request:AuthRequest[JsValue]) = {
-                    |        {request.body \ "entity"}.asOpt[{nameWC}].flatMap( entity => {
+                    |        {request.body \ "entity"}.asOpt[{nameWC}].map( entity => {
                     |            {plural}.insert(entity).map(x => {
                     |                Ok(Json.toJson( Map("id" -> JsNumber(x.id)) ))
                     |            })
                     |        }).getOrElse(Future(BadRequest("Parameter missing")))
+                    |    }
+                    |
+                    |    def delete(id:Long, request:AuthRequest[AnyContent]) = {
+                    |      {plural}.delete(id).map(x => Ok(Json.toJson(Map("success" -> JsBoolean(true)))))
                     |    }
                     |
                     |    def createNew(request:AuthRequest[AnyContent]) = {
@@ -72,6 +77,13 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |    def insert(name:String) = WithAuthAction.async(parse.json) { request =>
                         |        controllers.get(name) match {
                         |            case Some(x) => x.insert(request)
+                        |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
+                        |        }
+                        |    }
+                        |
+                        |    def delete(name:String, id:Long) = WithAuthAction.async { request =>
+                        |        controllers.get(name) match {
+                        |            case Some(x) => x.delete(id, request)
                         |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
                         |        }
                         |    }
