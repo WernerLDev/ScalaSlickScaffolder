@@ -9,6 +9,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |    def insert(request:AuthRequest[JsValue]):Future[Result]
                         |    def delete(id:Long, request:AuthRequest[AnyContent]):Future[Result]
                         |    def createNew(request:AuthRequest[AnyContent]):Future[Result]
+                        |    def getFormById(id:Long, request:AuthRequest[AnyContent]):Future[Result]
                         |}
                         |""".stripMargin
 
@@ -44,6 +45,19 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                     |        {plural}.insert({nameWC}(
                     |           {initialValues} 
                     |        )) map (x => Ok(Json.toJson(x)))
+                    |    }
+                    |
+                    |     def getFormById(id:Long, request:AuthRequest[AnyContent]) = {
+                    |        {plural}.getById(id).map(x => x match {
+                    |            case Some(p) => {
+                    |                Ok(Json.toJson(
+                    |                    List(
+                    |{formfields}
+                    |                    )
+                    |                ))
+                    |            }
+                    |            case None => BadRequest("Invalid {plural} id provided.")
+                    |        })
                     |    }
                     |
                     |}
@@ -101,18 +115,27 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |        }}.toSeq
                         |        Ok( Json.toJson(JsArray(entities)) )
                         |    }
+                        |    
+                        |    def getFormById(name:String, id:Long) = WithAuthAction.async { request =>
+                        |        controllers.get(name) match {
+                        |            case Some(x) => x.getFormById(id, request)
+                        |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
+                        |        }
+                        |    }
+                        |
                         |}
                         |""".stripMargin
 
     def generate = {
         traittpl + all.map(entity => {
-            val getstr = {
-                if(entity.relations.length == 0) {
-                    entity.plural + ".getAll.map(x => Ok(Json.toJson(x)))"
-                } else {
-                    entity.plural + ".getAll.map(entities => Ok(Json.toJson(entities.map(x => "+ generateMap(entity) +" ))))"
-                }
-            }
+            //val getstr = {
+            //    if(entity.relations.length == 0) {
+            //        entity.plural + ".getAll.map(x => Ok(Json.toJson(x)))"
+            //    } else {
+            //        entity.plural + ".getAll.map(entities => Ok(Json.toJson(entities.map(x => "+ generateMap(entity) +" ))))"
+            //   }
+            //}
+            val getstr = entity.plural + ".getAll.map(x => Ok(Json.toJson(x)))";
             tpl.replaceAll("\\{name\\}", entity.name.toLowerCase)
                .replaceAll("\\{nameWC\\}", entity.name.toLowerCase.capitalize)
                .replaceAll("\\{plural\\}", entity.plural.toLowerCase)
@@ -120,6 +143,8 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                .replaceAll("\\{getstr\\}", getstr)
                .replaceAll("\\{relationReads\\}", generateReads(entity))
                .replaceAll("\\{initialValues\\}", generateInitialValues(entity.attributes))
+               .replaceAll("\\{formfields\\}", generateFormFields(entity))
+
         }).mkString("\n") + generateMainController
     }
 
@@ -137,6 +162,30 @@ case class ControllerGenerator(all:List[SpecEntity]) {
             else if(a.atype.toLowerCase == "timestamp") "new Timestamp(new java.util.Date().getTime())"
             else "\"\""
         }).mkString(", ")
+    }
+
+    def generateFormFields(entity:SpecEntity) = {
+        val attributes:List[EntityAttribute] = entity.attributes
+        attributes.map(a => {
+            val attrType = a.atype.toLowerCase
+            val longs = List("long", "key")
+            val fieldValue = {
+                if(longs.contains(attrType)) s"JsNumber(p.${a.name})"
+                else if(attrType == "timestamp") s"JsNumber(p.${a.name}.getTime())"
+                else s"JsString(p.${a.name})"
+            }
+
+            val fieldType = {
+                if(a.name.endsWith("_id")) "readonly"
+                else if(attrType == "key") "readonly"
+                else if(attrType == "long") "number"
+                else if(attrType == "timestamp") "datetime"
+                else if(attrType == "string") "text"
+                else if(attrType == "text") "textarea"
+                else attrType
+            }
+            "                        Map(\"name\" -> JsString(\"" + a.name + "\"), \"type\" -> JsString(\"" + fieldType + "\"), \"value\" -> " + fieldValue + ")"
+        }).mkString(",\n")
     }
 
     def getMapField(x:EntityAttribute) = {
@@ -167,7 +216,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
             "    " + entity.plural.toLowerCase + ":Generated" + entity.plural.capitalize + "Controller"
         }).mkString(",\n")
         val maps = all.map(entity => {
-            "        \"" + entity.plural + "\" -> " + entity.plural
+            "        \"" + entity.name + "\" -> " + entity.plural
         }).mkString(",\n")
         val entityTypes = all.map(entity => {
             "        \"" + entity.name + "\" -> \"" + entity.plural + "\""

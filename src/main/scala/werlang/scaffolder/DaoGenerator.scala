@@ -70,8 +70,12 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
         }
     }
 
-    def generateGetById = generateSelect(".filter(_._1.id === id).result.headOption", ".filter(_.id === id).result.headOption")
-    def generateGetAll = generateSelect(".result", ".result")
+    def generateSelectWithoutRelation(afterRelation:String, after:String) = {
+        spec.plural + after
+    }
+
+    def generateGetById = generateSelectWithoutRelation(".filter(_._1.id === id).result.headOption", ".filter(_.id === id).result.headOption")
+    def generateGetAll = generateSelectWithoutRelation(".result", ".result")
 
     def getRelations = {
         spec.relations.map(relation => {
