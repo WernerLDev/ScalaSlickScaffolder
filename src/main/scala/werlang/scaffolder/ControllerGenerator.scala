@@ -1,6 +1,7 @@
 package werlang.scaffolder
 import werlang.scaffolder._
 
+
 case class ControllerGenerator(all:List[SpecEntity]) {
 
     val traittpl:String = """|
@@ -165,10 +166,15 @@ case class ControllerGenerator(all:List[SpecEntity]) {
     }
 
     def generateFormFields(entity:SpecEntity) = {
-        val attributes:List[EntityAttribute] = entity.attributes
+        
+        val relations = entity.relations.filter(_.has == "one").map(r => {
+            EntityAttribute(r.of + "_id", "relation", Some(r.of), None)
+        })
+
+        val attributes:List[EntityAttribute] = entity.attributes.filter(x => relations.filter(y => y.name == x.name).length == 0) ++ relations
         attributes.map(a => {
             val attrType = a.atype.toLowerCase
-            val longs = List("long", "key")
+            val longs = List("long", "key", "relation")
             val fieldValue = {
                 if(longs.contains(attrType)) s"JsNumber(p.${a.name})"
                 else if(attrType == "timestamp") s"JsNumber(p.${a.name}.getTime())"
@@ -176,7 +182,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
             }
 
             val fieldType = {
-                if(a.name.endsWith("_id")) "readonly"
+                if(a.name.endsWith("_id") && attrType != "relation") "readonly"
                 else if(attrType == "key") "readonly"
                 else if(attrType == "long") "number"
                 else if(attrType == "timestamp") "datetime"
@@ -184,7 +190,11 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                 else if(attrType == "text") "textarea"
                 else attrType
             }
-            "                        Map(\"name\" -> JsString(\"" + a.name + "\"), \"type\" -> JsString(\"" + fieldType + "\"), \"value\" -> " + fieldValue + ")"
+            val relation = {
+                if(attrType == "relation") "\"relation\" -> JsString(\"" + a.entity.getOrElse("") + "\"),"
+                else ""
+            }
+            "                        Map(\"name\" -> JsString(\"" + a.name + "\"), "+relation+" \"type\" -> JsString(\"" + fieldType + "\"), \"value\" -> " + fieldValue + ")"
         }).mkString(",\n")
     }
 

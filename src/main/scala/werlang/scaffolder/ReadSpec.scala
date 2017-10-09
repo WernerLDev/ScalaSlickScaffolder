@@ -5,7 +5,7 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 
 
-case class EntityAttribute(name:String, atype:String)
+case class EntityAttribute(name:String, atype:String, entity:Option[String], options:Option[List[String]])
 case class EntityRelation(has:String, of:String)
 case class SpecEntity(name:String, plural:String, attributes:List[EntityAttribute], relations:List[EntityRelation])
 case class SpecFile(

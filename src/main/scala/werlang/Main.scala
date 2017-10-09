@@ -26,11 +26,11 @@ object Main {
     }
 
     def addIds(obj:SpecEntity) = {
-        val idAttr = EntityAttribute("id", "key")
-        val nameAttr = EntityAttribute("name", "string")
+        val idAttr = EntityAttribute("id", "key", None, None)
+        val nameAttr = EntityAttribute("name", "string", None, None)
         val newAttributes = idAttr :: nameAttr :: obj.attributes
         val relations = obj.relations.filter(x => x.has == "one").map(relation => {
-            EntityAttribute(relation.of.toLowerCase + "_id", "Long")
+            EntityAttribute(relation.of.toLowerCase + "_id", "Long", None, None)
         })
         obj.copy(attributes = newAttributes ++ relations)
     }
