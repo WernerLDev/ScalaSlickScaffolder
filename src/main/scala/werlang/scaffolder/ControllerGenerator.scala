@@ -2,16 +2,56 @@ package werlang.scaffolder
 import werlang.scaffolder._
 
 
-case class ControllerGenerator(all:List[SpecEntity]) {
+case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity]) {
 
     val traittpl:String = """|
                         |trait TGenController {
                         |    def getAll(request:AuthRequest[AnyContent]):Future[Result]
                         |    def insert(request:AuthRequest[JsValue]):Future[Result]
+                        |    def update(request:AuthRequest[JsValue]):Future[Result]
                         |    def delete(id:Long, request:AuthRequest[AnyContent]):Future[Result]
                         |    def createNew(request:AuthRequest[AnyContent]):Future[Result]
                         |    def getFormById(id:Long, request:AuthRequest[AnyContent]):Future[Result]
                         |}
+                        |""".stripMargin
+
+    val relationtraittpl = """
+                        |trait TGenRelationController {
+                        |    def link(source_id:Long, target_id:Long):Future[Result]
+                        |    def unlink(source_id:Long, target_id:Long):Future[Result]
+                        |    def getBySourceId(id:Long):Future[Result]
+                        |}
+                        |""".stripMargin 
+
+    var relationtpl:String = """
+                        |@Singleton
+                        |class Generated{pluralWC}Controller @Inject() (
+                        |    WithAuthAction:AuthAction,
+                        |    {plural}:{pluralWC}
+                        |    ) extends Controller with TGenRelationController {
+                        |    
+                        |    implicit val {nameWC}Writes = Json.writes[{nameWC}]
+                        |
+                        |    def link(source_id:Long, target_id:Long) = {
+                        |        {plural}.link({nameWC}(source_id, target_id)).map(x => {
+                        |            Ok(Json.toJson(Map("success" -> JsBoolean(true))))
+                        |        })
+                        |    }
+                        |
+                        |    def unlink(source_id:Long, target_id:Long) = {
+                        |        {plural}.unlink({nameWC}(source_id, target_id)).map(x => {
+                        |            Ok(Json.toJson(Map("success" -> JsBoolean(true))))
+                        |        })
+                        |    }
+                        |
+                        |    def getBySourceId(source_id:Long) = {
+                        |        {plural}.getBySourceId(source_id).map(x => {
+                        |            Ok(Json.toJson(x))
+                        |        })
+                        |    }
+                        |
+                        |}
+                        |
                         |""".stripMargin
 
     val tpl:String = """
@@ -38,6 +78,14 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                     |        }).getOrElse(Future(BadRequest("Parameter missing")))
                     |    }
                     |
+                    |    def update(request:AuthRequest[JsValue]) = {
+                    |        (request.body \ "entity").asOpt[{nameWC}].map( entity => {
+                    |             {plural}.update(entity).map(x => {
+                    |                 Ok(Json.toJson(Map("success" -> JsBoolean(true))))
+                    |             })
+                    |        }).getOrElse(Future(BadRequest("Parameter missing")))
+                    |    }
+                    |
                     |    def delete(id:Long, request:AuthRequest[AnyContent]) = {
                     |      {plural}.delete(id).map(x => Ok(Json.toJson(Map("success" -> JsBoolean(true)))))
                     |    }
@@ -52,8 +100,13 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                     |        {plural}.getById(id).map(x => x match {
                     |            case Some(p) => {
                     |                Ok(Json.toJson(
-                    |                    List(
+                    |                    Map(
+                    |                       "attributes" -> List(
                     |{formfields}
+                    |                       ),
+                    |                       "relations" -> List(
+                    |{relationfields}
+                    |                       )
                     |                    )
                     |                ))
                     |            }
@@ -81,6 +134,9 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |{entityTypes}
                         |    )
                         |
+                        |    val relations = Map(
+                        |{relationsMap}
+                        |    )
                         |
                         |    def getAll(name:String) = WithAuthAction.async { request =>
                         |        controllers.get(name) match {
@@ -92,6 +148,13 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |    def insert(name:String) = WithAuthAction.async(parse.json) { request =>
                         |        controllers.get(name) match {
                         |            case Some(x) => x.insert(request)
+                        |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
+                        |        }
+                        |    }
+                        |
+                        |    def update(name:String) = WithAuthAction.async(parse.json) { request =>
+                        |        controllers.get(name) match {
+                        |            case Some(x) => x.update(request)
                         |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
                         |        }
                         |    }
@@ -124,6 +187,28 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                         |        }
                         |    }
                         |
+                        |    def link(name:String, source_id:Long, target_id:Long) = WithAuthAction.async { request =>
+                        |        relations.get(name) match {
+                        |            case Some(x) => x.link(source_id, target_id)
+                        |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
+                        |        }    
+                        |    }
+                        |
+                        |    def unlink(name:String, source_id:Long, target_id:Long) = WithAuthAction.async { request =>
+                        |        relations.get(name) match {
+                        |            case Some(x) => x.unlink(source_id, target_id)
+                        |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
+                        |        }
+                        |    }
+                        |
+                        |    def getRelationsBySourceId(name:String, source_id:Long) = WithAuthAction.async { request =>
+                        |        relations.get(name) match {
+                        |            case Some(x) => x.getBySourceId(source_id)
+                        |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
+                        |        }    
+                        |    }
+                        |
+                        |
                         |}
                         |""".stripMargin
 
@@ -145,8 +230,18 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                .replaceAll("\\{relationReads\\}", generateReads(entity))
                .replaceAll("\\{initialValues\\}", generateInitialValues(entity.attributes))
                .replaceAll("\\{formfields\\}", generateFormFields(entity))
+               .replaceAll("\\{relationfields\\}", generateRelationFields(entity))
 
-        }).mkString("\n") + generateMainController
+        }).mkString("\n") + generateRelations + generateMainController
+    }
+
+    def generateRelations = {
+        relationtraittpl + relations.map(entity => {
+            relationtpl.replaceAll("\\{name\\}", entity.name.toLowerCase)
+                       .replaceAll("\\{nameWC\\}", entity.name.toLowerCase.capitalize)
+                       .replaceAll("\\{plural\\}", entity.plural.toLowerCase)
+                       .replaceAll("\\{pluralWC\\}", entity.plural.toLowerCase.capitalize)
+        }).mkString("\n")
     }
 
     def generateReads(entity:SpecEntity) = {
@@ -163,6 +258,13 @@ case class ControllerGenerator(all:List[SpecEntity]) {
             else if(a.atype.toLowerCase == "timestamp") "new Timestamp(new java.util.Date().getTime())"
             else "\"\""
         }).mkString(", ")
+    }
+
+    def generateRelationFields(entity:SpecEntity) = {
+        entity.relations.filter(_.has == "many").map(r => {
+            val relationname = entity.name + r.of
+            "                           Map(\"relationname\" -> JsString(\"" + relationname + "\"), \"relation\" -> JsString(\"" + r.of + "\"))"
+        }).mkString(",\n")
     }
 
     def generateFormFields(entity:SpecEntity) = {
@@ -194,7 +296,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
                 if(attrType == "relation") "\"relation\" -> JsString(\"" + a.entity.getOrElse("") + "\"),"
                 else ""
             }
-            "                        Map(\"name\" -> JsString(\"" + a.name + "\"), "+relation+" \"type\" -> JsString(\"" + fieldType + "\"), \"value\" -> " + fieldValue + ")"
+            "                           Map(\"name\" -> JsString(\"" + a.name + "\"), "+relation+" \"type\" -> JsString(\"" + fieldType + "\"), \"value\" -> " + fieldValue + ")"
         }).mkString(",\n")
     }
 
@@ -222,7 +324,7 @@ case class ControllerGenerator(all:List[SpecEntity]) {
     }
 
     def generateMainController = {
-        val injects = all.map(entity => {
+        val injects = (all ++ relations).map(entity => {
             "    " + entity.plural.toLowerCase + ":Generated" + entity.plural.capitalize + "Controller"
         }).mkString(",\n")
         val maps = all.map(entity => {
@@ -231,8 +333,12 @@ case class ControllerGenerator(all:List[SpecEntity]) {
         val entityTypes = all.map(entity => {
             "        \"" + entity.name + "\" -> \"" + entity.plural + "\""
         }).mkString(",\n")
+        val relationsMap = relations.map(r => {
+            "        \"" + r.name + "\" -> " + r.plural
+        }).mkString(",\n")
         tplController.replaceAll("\\{controllers\\}", injects)
                      .replaceAll("\\{controllermap\\}", maps)
                      .replaceAll("\\{entityTypes\\}", entityTypes)
+                     .replaceAll("\\{relationsMap\\}", relationsMap)
     }
 }

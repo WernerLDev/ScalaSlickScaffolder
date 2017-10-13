@@ -22,6 +22,11 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                         |  UNIQUE INDEX `id_UNIQUE` (`id` ASC)
                         |);""".stripMargin
 
+    val upTplRelation:String = """
+                        |CREATE TABLE `{tblname}` (
+                        |{tblfields}
+                        |);
+                        |""".stripMargin
 
     def generate = {
         val fkeys = all.map(entity => {
@@ -34,7 +39,7 @@ case class MigrationGenerator(all:List[SpecEntity]) {
 
     def getSqlType(atype:String) = {
         if(atype == "string") "VARCHAR(255) NOT NULL"
-        else if(atype == "long") "INT(11) NOT NULL"
+        else if(atype == "long") "INT NOT NULL"
         else if(atype == "text") "TEXT NOT NULL"
         else if(atype == "timestamp") "DATETIME NOT NULL DEFAULT NOW()"
         else ""
@@ -54,7 +59,14 @@ case class MigrationGenerator(all:List[SpecEntity]) {
 
     def generateUps = {
         all.map(entity => {
-            val createsql = upTpl.replaceAll("\\{tblname\\}", entity.plural)
+            //val createsql = upTpl.replaceAll("\\{tblname\\}", entity.plural)
+            val createsql = {
+                if(entity.attributes.filter(_.name == "id").length > 0) {
+                    upTpl.replaceAll("\\{tblname\\}", entity.plural)
+                } else {
+                    upTplRelation.replaceAll("\\{tblname\\}", entity.plural)
+                }
+            }
             val fields = entity.attributes.map(field => {
                 if(field.atype == "key") {
                     "  `" + field.name + "` BIGINT NOT NULL AUTO_INCREMENT" 
