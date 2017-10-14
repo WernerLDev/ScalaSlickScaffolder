@@ -48,7 +48,10 @@ object Main {
                     entity.name + x.of, 
                     entity.name + relatedEntity.head.plural,
                     List(EntityAttribute("source_id", "Long", None, None), EntityAttribute("target_id", "Long", None, None)),
-                    List()
+                    List(
+                        EntityRelation("source", entity.plural.toLowerCase),
+                        EntityRelation("target", relatedEntity.head.plural.toLowerCase)
+                    )
                 )
             } else {
                 println("Error: Found relation with invalid entity: " + x.of)

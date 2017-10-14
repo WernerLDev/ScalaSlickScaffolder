@@ -24,7 +24,10 @@ case class MigrationGenerator(all:List[SpecEntity]) {
 
     val upTplRelation:String = """
                         |CREATE TABLE `{tblname}` (
-                        |{tblfields}
+                        |{tblfields},
+                        |  PRIMARY KEY (`source_id`,`target_id`),
+                        |  CONSTRAINT `{tblname}_{source}_FK` FOREIGN KEY (`source_id`) REFERENCES `{source}` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                        |  CONSTRAINT `{tblname}_{target}_FK` FOREIGN KEY (`target_id`) REFERENCES `{target}` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
                         |);
                         |""".stripMargin
 
@@ -65,11 +68,13 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                     upTpl.replaceAll("\\{tblname\\}", entity.plural)
                 } else {
                     upTplRelation.replaceAll("\\{tblname\\}", entity.plural)
+                                 .replaceAll("\\{source\\}", entity.relations.filter(_.has == "source").head.of)
+                                 .replaceAll("\\{target\\}", entity.relations.filter(_.has == "target").head.of)
                 }
             }
             val fields = entity.attributes.map(field => {
                 if(field.atype == "key") {
-                    "  `" + field.name + "` BIGINT NOT NULL AUTO_INCREMENT" 
+                    "  `" + field.name + "` INT NOT NULL AUTO_INCREMENT" 
                 } else {
                     "  `" + field.name + "` " + getSqlType(field.atype.toLowerCase)
                 }
@@ -81,7 +86,9 @@ case class MigrationGenerator(all:List[SpecEntity]) {
     }
 
     def generateDowns = {
-        all.map(entity => {
+        val allNonRelations = all.filter(x => x.attributes.filter(_.name == "id").length > 0)
+        val allRelations = all.filter(x => x.attributes.filter(_.name == "id").length <= 0)
+        (allRelations ++ allNonRelations).map(entity => {
             "DROP TABLE `" + entity.plural + "`;"
         })
     }
