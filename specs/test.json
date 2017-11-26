@@ -13,7 +13,8 @@
                 { "name" : "content", "atype" : "text" }
             ],
             "relations" : [
-                { "has" : "one", "of" : "category" }
+                { "has" : "one", "of" : "category", "unique": false },
+                { "has" : "one", "of" : "tag", "unique": true }
             ]
         }, {
             "name" : "Category",

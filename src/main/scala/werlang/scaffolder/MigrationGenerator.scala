@@ -49,15 +49,15 @@ case class MigrationGenerator(all:List[SpecEntity]) {
     }
 
     def generateIndexes(entity:SpecEntity) = {
-        val keys = entity.relations.filter(x => x.has == "one").map(relation => {
+        entity.relations.filter(x => x.has == "one").map(relation => {
             val re = all.filter(x => x.name == relation.of)
             if(re.length > 0) {
-                "ALTER TABLE `"+entity.plural+"` ADD INDEX ("+re.head.name+"_id)"
+                val unique = if(relation.unique) "UNIQUE" else ""
+                "ALTER TABLE `"+entity.plural+"` ADD "+unique+" INDEX ("+re.head.name+"_id);"
             } else {
                 ""
             }
-        }).mkString(";\n")
-        if(keys.length > 0) keys + ";" else ""
+        }).mkString("\n")
     }
 
     def generateUps = {

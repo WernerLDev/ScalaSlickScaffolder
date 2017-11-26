@@ -20,6 +20,7 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
                         |    def link(source_id:Long, target_id:Long):Future[Result]
                         |    def unlink(source_id:Long, target_id:Long):Future[Result]
                         |    def getBySourceId(id:Long):Future[Result]
+                        |    def getAll:Future[Result]
                         |}
                         |""".stripMargin 
 
@@ -48,6 +49,12 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
                         |        {plural}.getBySourceId(source_id).map(x => {
                         |            Ok(Json.toJson(x))
                         |        })
+                        |    }
+                        |
+                        |    def getAll = {
+                        |      {plural}.getAll.map(x => {
+                        |        Ok(Json.toJson(x))
+                        |      })
                         |    }
                         |
                         |}
@@ -208,6 +215,13 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
                         |        }    
                         |    }
                         |
+                        |    def getAllRelations(name:String) = WithAuthAction.async { request => 
+                        |      relations.get(name) match {
+                        |        case Some(x) => x.getAll
+                        |        case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
+                        |      }
+                        |    }
+                        |
                         |
                         |}
                         |""".stripMargin
@@ -263,7 +277,7 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
     def generateRelationFields(entity:SpecEntity) = {
         entity.relations.filter(_.has == "many").map(r => {
             val relationname = entity.name + r.of
-            "                           Map(\"relationname\" -> JsString(\"" + relationname + "\"), \"relation\" -> JsString(\"" + r.of + "\"))"
+            "                           Map(\"relationname\" -> JsString(\"" + relationname + "\"), \"relation\" -> JsString(\"" + r.of + "\"), \"unique\" -> JsBoolean("+r.unique+"))"
         }).mkString(",\n")
     }
 
@@ -293,7 +307,11 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
                 else attrType
             }
             val relation = {
-                if(attrType == "relation") "\"relation\" -> JsString(\"" + a.entity.getOrElse("") + "\"),"
+                if(attrType == "relation") {
+                    val r = entity.relations.filter(_.of == a.entity.getOrElse(""))
+                    val isUnique = r.head.unique
+                    "\"relation\" -> JsString(\"" + a.entity.getOrElse("") + "\"),\"unique\" -> JsBoolean("+isUnique+"),"
+                }
                 else ""
             }
             "                           Map(\"name\" -> JsString(\"" + a.name + "\"), "+relation+" \"type\" -> JsString(\"" + fieldType + "\"), \"value\" -> " + fieldValue + ")"

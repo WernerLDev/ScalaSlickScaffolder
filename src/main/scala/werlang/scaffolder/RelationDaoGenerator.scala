@@ -19,6 +19,10 @@ case class RelationDaoGenerator(spec:SpecEntity) {
                           |    {plural}.filter(_.source_id === id).result
                           |  }
                           |
+                          |  def getAll = dbConfig.db.run {  
+                          |    {plural}.result
+                          |  }
+                          |
                           |}
                           |""".stripMargin
 
