@@ -267,9 +267,10 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
     def generateInitialValues(attributes:List[EntityAttribute]) = {
         attributes.map(a => {
             val longs = List("long", "key")
-            var strings = List("text", "string")
+            val strings = List("text", "string")
+            val dates = List("timestamp", "date", "datetime")
             if(longs.contains(a.atype.toLowerCase)) "0"
-            else if(a.atype.toLowerCase == "timestamp") "new Timestamp(new java.util.Date().getTime())"
+            else if(dates.contains(a.atype.toLowerCase)) "new Timestamp(new java.util.Date().getTime())"
             else "\"\""
         }).mkString(", ")
     }
@@ -293,7 +294,7 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
             val longs = List("long", "key", "relation")
             val fieldValue = {
                 if(longs.contains(attrType)) s"JsNumber(p.${a.name})"
-                else if(attrType == "timestamp") s"JsNumber(p.${a.name}.getTime())"
+                else if(attrType == "timestamp" || attrType == "datetime" || attrType == "date") s"JsNumber(p.${a.name}.getTime())"
                 else s"JsString(p.${a.name})"
             }
 

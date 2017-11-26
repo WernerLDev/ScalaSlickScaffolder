@@ -49,8 +49,8 @@ object Main {
                     entity.name + relatedEntity.head.plural,
                     List(EntityAttribute("source_id", "Long", None, None), EntityAttribute("target_id", "Long", None, None)),
                     List(
-                        EntityRelation("source", entity.plural.toLowerCase),
-                        EntityRelation("target", relatedEntity.head.plural.toLowerCase)
+                        EntityRelation("source", entity.plural.toLowerCase, false),
+                        EntityRelation("target", relatedEntity.head.plural.toLowerCase, x.unique)
                     )
                 )
             } else {

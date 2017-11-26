@@ -26,6 +26,7 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                         |CREATE TABLE `{tblname}` (
                         |{tblfields},
                         |  PRIMARY KEY (`source_id`,`target_id`),
+                        |  {unique}
                         |  CONSTRAINT `{tblname}_{source}_FK` FOREIGN KEY (`source_id`) REFERENCES `{source}` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
                         |  CONSTRAINT `{tblname}_{target}_FK` FOREIGN KEY (`target_id`) REFERENCES `{target}` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
                         |);
@@ -44,7 +45,7 @@ case class MigrationGenerator(all:List[SpecEntity]) {
         if(atype == "string") "VARCHAR(255) NOT NULL"
         else if(atype == "long") "INT NOT NULL"
         else if(atype == "text") "TEXT NOT NULL"
-        else if(atype == "timestamp") "DATETIME NOT NULL DEFAULT NOW()"
+        else if(atype == "timestamp" || atype == "date" || atype == "datetime") "DATETIME NOT NULL DEFAULT NOW()"
         else ""
     }
 
@@ -67,9 +68,17 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                 if(entity.attributes.filter(_.name == "id").length > 0) {
                     upTpl.replaceAll("\\{tblname\\}", entity.plural)
                 } else {
+                    val sourceEntity = entity.relations.filter(_.has == "source").head
+                    val targetEntity = entity.relations.filter(_.has == "target").head
+                    val uniqueConstraint = {
+                        if(targetEntity.unique) {
+                            "CONSTRAINT target_UN UNIQUE KEY (`target_id`),"
+                        } else ""
+                    }
                     upTplRelation.replaceAll("\\{tblname\\}", entity.plural)
-                                 .replaceAll("\\{source\\}", entity.relations.filter(_.has == "source").head.of)
-                                 .replaceAll("\\{target\\}", entity.relations.filter(_.has == "target").head.of)
+                                 .replaceAll("\\{source\\}", sourceEntity.of)
+                                 .replaceAll("\\{target\\}", targetEntity.of)
+                                 .replaceAll("\\{unique\\}", uniqueConstraint)
                 }
             }
             val fields = entity.attributes.map(field => {
