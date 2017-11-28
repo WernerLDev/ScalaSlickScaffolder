@@ -1,5 +1,6 @@
 package werlang.scaffolder
 import werlang.scaffolder._
+import werlang.spec._
 
 case class JSApiGenerator(all:List[SpecEntity]) {
 

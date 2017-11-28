@@ -1,6 +1,7 @@
 package werlang.scaffolder
 
 import werlang.scaffolder._
+import werlang.spec._
 
 case class Generator(spec:SpecEntity, all:List[SpecEntity]) {
 

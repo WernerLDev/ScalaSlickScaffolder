@@ -1,6 +1,6 @@
 package werlang.scaffolder
 import werlang.scaffolder._
-
+import werlang.spec._
 
 case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity]) {
 
