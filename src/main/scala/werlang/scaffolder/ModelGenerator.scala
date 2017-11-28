@@ -27,6 +27,7 @@ case class ModelGenerator(spec:SpecEntity) {
         else if(t == "string") "String"
         else if(t == "timestamp" || t == "datetime" || t == "date") "Timestamp"
         else if(t == "key") "Long"
+        else if(t == "long") "Long"
         else t
     }
 
