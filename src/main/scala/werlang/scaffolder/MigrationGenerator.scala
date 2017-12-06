@@ -20,7 +20,8 @@ case class MigrationGenerator(all:List[SpecEntity]) {
                         |CREATE TABLE `{tblname}` ( 
                         |{tblfields},
                         |  PRIMARY KEY (`id`),
-                        |  UNIQUE INDEX `id_UNIQUE` (`id` ASC)
+                        |  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+                        |  CONSTRAINT `{tblname}_entity_id_FK` FOREIGN KEY (`entity_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
                         |);""".stripMargin
 
     val upTplRelation:String = """

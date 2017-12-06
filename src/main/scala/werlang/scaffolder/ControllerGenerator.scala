@@ -97,7 +97,7 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
                     |      {plural}.delete(id).map(x => Ok(Json.toJson(Map("success" -> JsBoolean(true)))))
                     |    }
                     |
-                    |    def createNew(request:AuthRequest[AnyContent]) = {
+                    |    def createNew(request:AuthRequest[AnyContent], entityId:Long) = {
                     |        {plural}.insert({nameWC}(
                     |           {initialValues} 
                     |        )) map (x => Ok(Json.toJson(x)))
@@ -173,9 +173,9 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
                         |        }
                         |    }
                         |
-                        |    def createNew(name:String) = WithAuthAction.async { request =>
+                        |    def createNew(name:String, entityId:Long) = WithAuthAction.async { request =>
                         |        controllers.get(name) match {
-                        |            case Some(x) => x.createNew(request)
+                        |            case Some(x) => x.createNew(request, entityId)
                         |            case None => Future(BadRequest("Error: Entity with name " + name + " doesn't exist."))
                         |        }
                         |    }
@@ -269,7 +269,8 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
             val longs = List("long", "key")
             val strings = List("text", "string")
             val dates = List("timestamp", "date", "datetime")
-            if(longs.contains(a.atype.toLowerCase)) "0"
+            if(a.name == "entity_id") "entityId"
+            else if(longs.contains(a.atype.toLowerCase)) "0"
             else if(dates.contains(a.atype.toLowerCase)) "new Timestamp(new java.util.Date().getTime())"
             else "\"\""
         }).mkString(", ")

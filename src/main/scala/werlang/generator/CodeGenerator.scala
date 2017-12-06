@@ -18,7 +18,7 @@ case class CodeGenerator(spec:SpecFile, relationEntities:List[SpecEntity]) {
     pw.write(generateRelationModels(relationEntities))
     pw.write(generateModels(spec.entities))
     pw.close()
-    Message.ok(s"Generated ${spec.modelFolder}/Tables.scala")
+    Message.ok(s"Generated Tables.scala")
 
     generateDaoClasses(spec.entities ++ relationEntities)
     generateMigrations(spec.entities ++ relationEntities)
@@ -72,13 +72,13 @@ case class CodeGenerator(spec:SpecFile, relationEntities:List[SpecEntity]) {
       val generator = DaoGenerator(entity, List())
       val modelFile = new File(spec.modelFolder + "/" + entity.name + ".scala")
       if(modelFile.exists) {
-        Message.ok(s"Skipping ${spec.modelFolder}/${entity.name}.scala, Already exists.")
+        Message.ok(s"Skipping ${entity.name}.scala, Already exists.")
       } else {
         val classpw = new PrintWriter(modelFile)
         classpw.write(imports)
         classpw.write(generator.generateClass)
         classpw.close()
-        Message.ok(s"Generated ${spec.modelFolder}/${entity.name}.scala")
+        Message.ok(s"Generated ${entity.name}.scala")
       }
     })
   }

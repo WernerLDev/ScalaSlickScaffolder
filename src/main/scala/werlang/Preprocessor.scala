@@ -11,8 +11,8 @@ object Preprocessor {
     
     def addIds(obj:SpecEntity):SpecEntity = {
         val idAttr = EntityAttribute("id", "key", None, None)
-        val nameAttr = EntityAttribute("name", "string", None, None)
-        val newAttributes = idAttr :: obj.attributes
+        val entityIdAttr = EntityAttribute("entity_id", "long", None, None)
+        val newAttributes = idAttr :: entityIdAttr :: obj.attributes
         val relations = obj.relations.filter(x => x.has == "one").map(relation => {
             EntityAttribute(relation.of.toLowerCase + "_id", "long", None, None)
         })
@@ -31,17 +31,19 @@ object Preprocessor {
             val relatedEntity = all.filter(_.name == x.of)
             if(relatedEntity.nonEmpty) {
                 SpecEntity(
-                    entity.name + x.of,
-                    entity.name + relatedEntity.head.plural,
-                    List(EntityAttribute("source_id", "Long", None, None), EntityAttribute("target_id", "Long", None, None)),
-                    List(
+                    name = entity.name + x.of,
+                    plural = entity.name + relatedEntity.head.plural,
+                    attributes = List(EntityAttribute("source_id", "Long", None, None), EntityAttribute("target_id", "Long", None, None)),
+                    relations = List(
                         EntityRelation("source", entity.plural.toLowerCase, false),
                         EntityRelation("target", relatedEntity.head.plural.toLowerCase, x.unique)
-                    )
+                    ),
+                    isAbstract = None,
+                    inherits = None
                 )
             } else {
                 println("Error: Found relation with invalid entity: " + x.of)
-                SpecEntity("-", "-", List(), List())
+                SpecEntity("-", "-", List(), List(), None, None)
             }
         }).filter(_.name != "-")
     }

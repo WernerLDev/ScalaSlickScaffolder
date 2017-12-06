@@ -1,6 +1,13 @@
 package werlang.spec
 
-case class SpecEntity(name:String, plural:String, attributes:List[EntityAttribute], relations:List[EntityRelation]) {
+case class SpecEntity(
+    name:String, 
+    plural:String, 
+    attributes:List[EntityAttribute], 
+    relations:List[EntityRelation],
+    isAbstract:Option[Boolean],
+    inherits:Option[String]
+) {
     
     override def toString = {
 
