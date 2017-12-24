@@ -22,18 +22,22 @@ object Main {
 
     val reader = SpecReader(specFile)
     reader.getData match {
-      case e: JsError => Message.handleParseErrors(e)
+      case e:JsError => Message.handleParseErrors(e)
       case x:JsSuccess[SpecFile] => {
         Message.info("JSON file loaded, checking spec...")
         val specFile = x.get
 
-        val entities = specFile.entities.map(entity => Preprocessor.forceLowerCase(Preprocessor.addIds(entity)))
+        val entities = specFile.entities.map(entity => 
+          Preprocessor.forceLowerCase(Preprocessor.addIds(entity))
+        )
         
         if(!CheckSpec.check(entities)) {
           Message.error("Check failed")
         } else {
           val processedSpec = specFile.copy(entities = entities)
-          val relationEntities = entities.flatMap(x => Preprocessor.createRelationEntities(x, entities))
+          val relationEntities = entities.flatMap(x => 
+            Preprocessor.createRelationEntities(x, entities)
+          )
           CodeGenerator(processedSpec, relationEntities).generate()
 
           Message.green("All finished !")

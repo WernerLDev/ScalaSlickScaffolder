@@ -26,6 +26,10 @@ case class DaoGenerator(spec:SpecEntity, all:List[SpecEntity]) {
                           |    {getById}
                           |  }
                           |
+                          |  def getByEntityId(id:Long) = dbConfig.db.run {
+                          |    {plural}.filter(_.entity_id === id).result.headOption
+                          |  }
+                          |
                           |  def getAll = dbConfig.db.run {
                           |    {getall}
                           |  }

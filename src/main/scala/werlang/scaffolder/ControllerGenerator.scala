@@ -10,7 +10,7 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
                         |    def insert(request:AuthRequest[JsValue]):Future[Result]
                         |    def update(request:AuthRequest[JsValue]):Future[Result]
                         |    def delete(id:Long, request:AuthRequest[AnyContent]):Future[Result]
-                        |    def createNew(request:AuthRequest[AnyContent]):Future[Result]
+                        |    def createNew(request:AuthRequest[AnyContent], entityId:Long):Future[Result]
                         |    def getFormById(id:Long, request:AuthRequest[AnyContent]):Future[Result]
                         |}
                         |""".stripMargin
@@ -104,7 +104,7 @@ case class ControllerGenerator(all:List[SpecEntity], relations:List[SpecEntity])
                     |    }
                     |
                     |     def getFormById(id:Long, request:AuthRequest[AnyContent]) = {
-                    |        {plural}.getById(id).map(x => x match {
+                    |        {plural}.getByEntityId(id).map(x => x match {
                     |            case Some(p) => {
                     |                Ok(Json.toJson(
                     |                    Map(
